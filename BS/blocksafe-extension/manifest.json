@@ -1,0 +1,12 @@
+{
+    "manifest_version": 3,
+    "name": "BlockSafe",
+    "description": "Smart contract & transaction scanner",
+    "version": "1.0",
+    "action": {
+      "default_popup": "popup.html",
+      "default_title": "BlockSafe"
+    },
+    "permissions": []
+  }
+  

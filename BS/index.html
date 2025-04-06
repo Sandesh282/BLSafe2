@@ -1,0 +1,1370 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BlockSafe - HyperRobotic AI Panel</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ==========================================================================
+       RESET & BASE STYLES
+    ========================================================================== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow-x: hidden;
+    }
+
+    body {
+      font-family: 'Orbitron', sans-serif;
+      background: radial-gradient(circle at center, #0a0f1c, #000);
+      color: #0ff;
+      position: relative;
+      padding: 40px 20px;
+    }
+
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* ==========================================================================
+       BACKGROUND ANIMATIONS & EFFECTS
+    ========================================================================== */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(0, 255, 255, 0.1), transparent 70%);
+      animation: bgShift 12s linear infinite;
+      z-index: -4;
+    }
+
+    @keyframes bgShift {
+      0% {
+        transform: translate(0, 0);
+      }
+
+      100% {
+        transform: translate(-50%, -50%);
+      }
+    }
+
+    /* Moving robotic lines */
+    .robotic-lines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: -3;
+      overflow: hidden;
+    }
+
+    .robotic-line {
+      position: absolute;
+      background: #0ff;
+      opacity: 0.3;
+      animation: lineScan 8s linear infinite;
+    }
+
+    .robotic-line.horizontal {
+      width: 100%;
+      height: 1px;
+      left: 0;
+    }
+
+    .robotic-line.vertical {
+      width: 1px;
+      height: 100%;
+      top: 0;
+    }
+
+    .robotic-line.diagonal {
+      width: 150%;
+      height: 1px;
+      transform: rotate(45deg);
+      transform-origin: left top;
+    }
+
+    @keyframes lineScan {
+      0% {
+        opacity: 0.1;
+      }
+
+      20% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 0.8;
+      }
+
+      80% {
+        opacity: 0.3;
+      }
+
+      100% {
+        opacity: 0.1;
+      }
+    }
+
+    @keyframes moveHorizontal {
+      0% {
+        transform: translateY(-100vh);
+      }
+
+      100% {
+        transform: translateY(100vh);
+      }
+    }
+
+    @keyframes moveVertical {
+      0% {
+        transform: translateX(-100vw);
+      }
+
+      100% {
+        transform: translateX(100vw);
+      }
+    }
+
+    @keyframes moveDiagonal {
+      0% {
+        transform: rotate(45deg) translateX(-100%);
+      }
+
+      100% {
+        transform: rotate(45deg) translateX(100%);
+      }
+    }
+
+    /* ==========================================================================
+       HEADER & NAVIGATION
+    ========================================================================== */
+    header {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 20px;
+      margin-bottom: 40px;
+      border-bottom: 1px solid rgba(0, 255, 255, 0.2);
+    }
+
+    .logo {
+      font-size: 32px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-shadow: 0 0 12px #0ff, 0 0 20px #0ff;
+      animation: flicker 3s infinite alternate;
+    }
+
+    @keyframes flicker {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.7;
+      }
+    }
+
+    nav {
+      display: flex;
+      gap: 20px;
+    }
+
+    nav a {
+      font-size: 16px;
+      padding: 6px 12px;
+      border-radius: 4px;
+      transition: background 0.3s, transform 0.3s;
+      position: relative;
+    }
+
+    nav a:hover {
+      background: rgba(0, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    nav a::after {
+      content: '';
+      position: absolute;
+      bottom: -3px;
+      left: 0;
+      width: 0;
+      height: 2px;
+      background: #0ff;
+      transition: width 0.3s;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    /* ==========================================================================
+       HERO SECTION & GLITCH TEXT EFFECTS
+    ========================================================================== */
+    .hero {
+      text-align: center;
+      margin-bottom: 80px;
+      position: relative;
+      padding: 40px 20px;
+    }
+
+    .hero h1 {
+      font-size: 56px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      text-shadow: 0 0 20px #0ff, 0 0 40px #0ff;
+      position: relative;
+    }
+
+    .hero h1 .glitch {
+      position: relative;
+      color: #00ffe7;
+    }
+
+    .hero h1 .glitch::before,
+    .hero h1 .glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0.8;
+      clip: rect(0, 900px, 0, 0);
+    }
+
+    .hero h1 .glitch::before {
+      animation: glitchAnim2 3s infinite;
+      color: #0ff;
+    }
+
+    .hero h1 .glitch::after {
+      animation: glitchAnim3 1.5s infinite;
+      color: #ff00ff;
+    }
+
+    @keyframes glitchAnim2 {
+      0% {
+        clip: rect(10px, 9999px, 40px, 0);
+        transform: translate(-3px, -3px);
+      }
+
+      20% {
+        clip: rect(80px, 9999px, 90px, 0);
+        transform: translate(3px, 3px);
+      }
+
+      40% {
+        clip: rect(50px, 9999px, 70px, 0);
+        transform: translate(-3px, 0);
+      }
+
+      60% {
+        clip: rect(30px, 9999px, 50px, 0);
+        transform: translate(0, 3px);
+      }
+
+      80% {
+        clip: rect(70px, 9999px, 80px, 0);
+        transform: translate(3px, -3px);
+      }
+
+      100% {
+        clip: rect(10px, 9999px, 40px, 0);
+        transform: translate(-3px, -3px);
+      }
+    }
+
+    @keyframes glitchAnim3 {
+      0% {
+        clip: rect(20px, 9999px, 60px, 0);
+        transform: translate(3px, 3px);
+      }
+
+      20% {
+        clip: rect(10px, 9999px, 40px, 0);
+        transform: translate(-3px, -3px);
+      }
+
+      40% {
+        clip: rect(80px, 9999px, 90px, 0);
+        transform: translate(3px, 0);
+      }
+
+      60% {
+        clip: rect(50px, 9999px, 70px, 0);
+        transform: translate(0, -3px);
+      }
+
+      80% {
+        clip: rect(30px, 9999px, 50px, 0);
+        transform: translate(-3px, 3px);
+      }
+
+      100% {
+        clip: rect(20px, 9999px, 60px, 0);
+        transform: translate(3px, 3px);
+      }
+    }
+
+    .hero p {
+      font-size: 20px;
+      max-width: 700px;
+      margin: 0 auto 40px;
+      line-height: 1.5;
+      opacity: 0.95;
+    }
+
+    .hero button {
+      background: #0ff;
+      color: #000;
+      font-size: 18px;
+      font-weight: bold;
+      border: none;
+      padding: 16px 40px;
+      border-radius: 40px;
+      cursor: pointer;
+      box-shadow: 0 0 30px #0ff;
+      transition: transform 0.3s, background 0.3s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero button:hover {
+      transform: scale(1.1);
+      background: #00e6d0;
+    }
+
+    /* ==========================================================================
+       ACTIVATE FEATURES SECTION (Hidden by Default)
+    ========================================================================== */
+    #activateFeatures {
+      display: none;
+      margin: 40px auto;
+      max-width: 700px;
+      padding: 20px;
+    }
+
+    .feature-bar {
+      background: #4CAF50;
+      color: #fff;
+      font-size: 18px;
+      text-align: center;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .feature-bar:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    }
+
+    .fade-in {
+      animation: fadeIn 0.8s forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* ==========================================================================
+       CARDS SECTION (3 BLOCKS)
+    ========================================================================== */
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 40px;
+      max-width: 1200px;
+      margin: 0 auto 80px;
+      padding: 0 20px;
+    }
+
+    .card {
+      background: rgba(0, 255, 231, 0.04);
+      border: 1px solid rgba(0, 255, 231, 0.3);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(0, 255, 231, 0.2);
+      position: relative;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 0 40px rgba(0, 255, 231, 0.4);
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      right: -1px;
+      bottom: -1px;
+      left: -1px;
+      border-radius: 20px;
+      border: 1px dashed #0ff;
+      animation: cardPulse 2s infinite;
+    }
+
+    @keyframes cardPulse {
+
+      0%,
+      100% {
+        opacity: 0.3;
+      }
+
+      50% {
+        opacity: 1;
+      }
+    }
+
+    .card h3 {
+      font-size: 26px;
+      margin-bottom: 20px;
+      color: #00ffe7;
+      letter-spacing: 1px;
+    }
+
+    .card p,
+    .card ul {
+      font-size: 16px;
+      line-height: 1.6;
+      opacity: 0.95;
+      margin-top: 10px;
+      text-align: left;
+    }
+
+    .card ul {
+      list-style: disc;
+      margin-left: 20px;
+    }
+
+    .robot-emoji {
+      font-size: 100px;
+      text-align: center;
+      margin: 20px auto;
+      animation: pulseEmoji 2s infinite alternate;
+    }
+
+    @keyframes pulseEmoji {
+      0% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px #ff0000);
+      }
+
+      100% {
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 20px #ff0000);
+      }
+    }
+
+    /* ==========================================================================
+       TESTIMONIALS SECTION WITH SLIDE & FADE EFFECTS
+    ========================================================================== */
+    .testimonials {
+      max-width: 1200px;
+      margin: 0 auto 80px;
+      padding: 40px 20px;
+      background: rgba(0, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      border-radius: 20px;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 30px rgba(0, 255, 255, 0.2);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .testimonials h2 {
+      font-size: 36px;
+      text-align: center;
+      margin-bottom: 30px;
+      color: #00ffe7;
+      animation: slideIn 1s ease-out forwards;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateX(-100%);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+
+    .testimonial-item {
+      font-size: 18px;
+      line-height: 1.6;
+      padding: 20px;
+      border-left: 3px solid #0ff;
+      margin-bottom: 20px;
+      opacity: 0;
+      animation: fadeIn 1.5s forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .testimonial-item:nth-child(1) {
+      animation-delay: 0.5s;
+    }
+
+    .testimonial-item:nth-child(2) {
+      animation-delay: 1s;
+    }
+
+    .testimonial-item:nth-child(3) {
+      animation-delay: 1.5s;
+    }
+
+    /* ==========================================================================
+       FEATURES SECTION WITH PARALLAX & HOVER BOUNCE
+    ========================================================================== */
+    .features {
+      max-width: 1200px;
+      margin: 0 auto 80px;
+      padding: 40px 20px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 40px;
+    }
+
+    .feature {
+      background: rgba(0, 255, 255, 0.03);
+      border: 1px solid rgba(0, 255, 255, 0.2);
+      padding: 30px;
+      border-radius: 20px;
+      transition: transform 0.3s;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+    }
+
+    .feature:hover {
+      transform: translateY(-8px) scale(1.02);
+    }
+
+    .feature h3 {
+      font-size: 24px;
+      margin-bottom: 15px;
+      color: #00ffe7;
+    }
+
+    .feature p {
+      font-size: 16px;
+      line-height: 1.6;
+      opacity: 0.95;
+    }
+
+    .parallax-bg {
+      background-image: url('https://i.imgur.com/8Km9tLL.jpg');
+      background-attachment: fixed;
+      background-size: cover;
+      background-position: center;
+      filter: brightness(0.3);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+    }
+
+    /* ==========================================================================
+       FOOTER WITH BOUNCE & SCROLL EFFECTS
+    ========================================================================== */
+    footer {
+      padding: 40px 20px;
+      text-align: center;
+      background: rgba(0, 255, 255, 0.03);
+      border-top: 1px solid rgba(0, 255, 255, 0.2);
+      margin-top: 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    footer p {
+      font-size: 16px;
+      margin-bottom: 10px;
+    }
+
+    .scroll-indicator {
+      width: 30px;
+      height: 30px;
+      margin: 10px auto 0;
+      border: 2px solid #0ff;
+      border-radius: 50%;
+      animation: bounce 2s infinite;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    /* ==========================================================================
+       ROBOTIC LINE EFFECTS & ADDITIONAL ANIMATIONS
+    ========================================================================== */
+    .scan-line {
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, #0ff, transparent);
+      opacity: 0.7;
+      animation: scan 4s linear infinite;
+      z-index: -1;
+    }
+
+    @keyframes scan {
+      0% {
+        top: 0%;
+        opacity: 0;
+      }
+
+      10% {
+        opacity: 0.8;
+      }
+
+      90% {
+        opacity: 0.8;
+      }
+
+      100% {
+        top: 100%;
+        opacity: 0;
+      }
+    }
+
+    .flitter {
+      animation: flitterText 1.5s infinite;
+    }
+
+    @keyframes flitterText {
+      0% {
+        opacity: 1;
+      }
+
+      25% {
+        opacity: 0.8;
+      }
+
+      50% {
+        opacity: 0.6;
+      }
+
+      75% {
+        opacity: 0.8;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    .bounce-in {
+      animation: bounceIn 1s ease;
+    }
+
+    @keyframes bounceIn {
+      0% {
+        transform: scale(0.5);
+        opacity: 0;
+      }
+
+      60% {
+        transform: scale(1.05);
+        opacity: 1;
+      }
+
+      80% {
+        transform: scale(0.95);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    .slow-spin {
+      animation: spin 20s linear infinite;
+    }
+
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .ripple {
+      position: absolute;
+      border-radius: 50%;
+      transform: scale(0);
+      animation: rippleEffect 0.8s linear;
+      background: rgba(0, 255, 255, 0.7);
+    }
+
+    @keyframes rippleEffect {
+      to {
+        transform: scale(4);
+        opacity: 0;
+      }
+    }
+
+    .subtitle-glitch {
+      position: relative;
+      font-size: 22px;
+      color: #0ff;
+    }
+
+    .subtitle-glitch::before,
+    .subtitle-glitch::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0.7;
+    }
+
+    .subtitle-glitch::before {
+      color: #00ffee;
+      animation: glitchAnim2 2.5s infinite;
+    }
+
+    .subtitle-glitch::after {
+      color: #ff00ff;
+      animation: glitchAnim3 1.2s infinite;
+    }
+
+    .pulse-fast {
+      animation: pulse 1s infinite;
+    }
+
+    .pulse-slow {
+      animation: pulse 3s infinite;
+    }
+
+    .border-animate {
+      border: 2px solid transparent;
+      background-clip: padding-box;
+      position: relative;
+    }
+
+    .border-animate::after {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #0ff, #ff0, #0ff);
+      z-index: -1;
+      filter: blur(4px);
+      opacity: 0.5;
+      animation: borderGlow 4s linear infinite;
+    }
+
+    @keyframes borderGlow {
+      0% {
+        opacity: 0.5;
+      }
+
+      50% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0.5;
+      }
+    }
+
+    /* ==========================================================================
+       RESPONSIVE ADJUSTMENTS
+    ========================================================================== */
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 42px;
+      }
+
+      .hero p {
+        font-size: 18px;
+      }
+
+      nav a {
+        font-size: 14px;
+      }
+
+      .card h3 {
+        font-size: 22px;
+      }
+
+      .feature h3 {
+        font-size: 20px;
+      }
+
+      .testimonial-item {
+        font-size: 16px;
+      }
+    }
+
+    /* ==========================================================================
+       EXTRA CSS EFFECTS
+    ========================================================================== */
+    @supports not (animation: test) {
+      .hero h1 {
+        color: #00ffe7;
+      }
+
+      .card {
+        border: 1px solid #0ff;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .hero h1 {
+        font-size: 36px;
+      }
+
+      .hero p {
+        font-size: 16px;
+      }
+
+      .card h3 {
+        font-size: 20px;
+      }
+    }
+
+    .transition-smooth {
+      transition: all 0.5s ease-in-out;
+    }
+
+    @keyframes extraGlow {
+      0% {
+        filter: brightness(0.8) contrast(1);
+      }
+
+      50% {
+        filter: brightness(1.2) contrast(1.5);
+      }
+
+      100% {
+        filter: brightness(0.8) contrast(1);
+      }
+    }
+
+    .extra-glow {
+      animation: extraGlow 5s infinite;
+    }
+
+    .effect-rotate {
+      animation: rotateEffect 10s linear infinite;
+    }
+
+    @keyframes rotateEffect {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    .effect-scale {
+      animation: scaleEffect 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes scaleEffect {
+      0% {
+        transform: scale(0.95);
+      }
+
+      100% {
+        transform: scale(1.05);
+      }
+    }
+
+    .effect-color {
+      animation: colorChange 12s ease-in-out infinite;
+    }
+
+    @keyframes colorChange {
+      0% {
+        color: #0ff;
+      }
+
+      50% {
+        color: #ff00ff;
+      }
+
+      100% {
+        color: #0ff;
+      }
+    }
+
+    .effect-shadow {
+      animation: shadowPulse 6s infinite;
+    }
+
+    @keyframes shadowPulse {
+      0% {
+        text-shadow: 0 0 5px #0ff;
+      }
+
+      50% {
+        text-shadow: 0 0 20px #0ff;
+      }
+
+      100% {
+        text-shadow: 0 0 5px #0ff;
+      }
+    }
+
+    /* ==========================================================================
+   ACTIVATION FEATURES SECTION (Enhanced Cyberpunk Style)
+========================================================================== */
+    #activateFeatures {
+      display: none;
+      margin: 40px auto;
+      max-width: 500px;
+      padding: 25px;
+      background: rgba(0, 20, 30, 0.7);
+      border: 1px solid #0ff;
+      border-radius: 10px;
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.4),
+        inset 0 0 15px rgba(0, 255, 255, 0.2);
+      backdrop-filter: blur(8px);
+    }
+
+    .feature-bar {
+      background: linear-gradient(90deg,
+          rgba(0, 50, 70, 0.7),
+          rgba(0, 100, 120, 0.5));
+      color: #0ff;
+      font-size: 18px;
+      font-weight: 500;
+      text-align: left;
+      padding: 18px 25px;
+      margin: 15px 0;
+      border-radius: 8px;
+      border-left: 4px solid #0ff;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      text-shadow: 0 0 8px rgba(0, 255, 255, 0.7);
+      box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+    }
+
+    .feature-bar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg,
+          transparent,
+          rgba(0, 255, 255, 0.4),
+          transparent);
+      transition: 0.5s;
+    }
+
+    .feature-bar:hover::before {
+      left: 100%;
+    }
+
+    .feature-bar:hover {
+      transform: translateX(5px);
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.6);
+      background: linear-gradient(90deg,
+          rgba(0, 70, 90, 0.8),
+          rgba(0, 120, 140, 0.6));
+    }
+
+    .feature-bar:nth-child(1) {
+      border-left-color: #00ff88;
+    }
+
+    .feature-bar:nth-child(2) {
+      border-left-color: #ff5555;
+    }
+
+    .feature-bar:nth-child(3) {
+      border-left-color: #8888ff;
+    }
+
+    .fade-in {
+      animation: fadeIn 0.8s forwards;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ROBOTIC LINES CONTAINER -->
+  <div class="robotic-lines" id="roboticLines"></div>
+
+  <!-- BACKGROUND LAYERS -->
+  <div class="shape one"></div>
+  <div class="shape two"></div>
+  <div class="shape three"></div>
+  <div class="shape four"></div>
+  <div class="shape five"></div>
+
+  <!-- HEADER -->
+  <header>
+    <div class="logo trigger-glitch">BLOCKSAFE</div>
+    <nav>
+      <a href="#hero" class="bounce-in">Home</a>
+      <a href="#cards" class="bounce-in">Solutions</a>
+      <a href="#testimonials" class="bounce-in">Testimonials</a>
+      <a href="#features" class="bounce-in">Features</a>
+      <a href="#footer" class="bounce-in">Contact</a>
+    </nav>
+  </header>
+
+  <!-- HERO SECTION -->
+  <section class="hero" id="hero">
+    <h1>
+      <span class="glitch" data-text="BLOCKSAFE WEB3 ARMOR">BLOCKSAFE WEB3 ARMOR</span><br>
+      FORTIFY YOUR TRANSACTIONS.
+    </h1>
+    <p class="flitter">
+      Security-first. Scam-proof. Wallet-protecting extension built for the decentralized future. Stay ahead of frauds.
+    </p>
+    <button class="btn" id="activateBtn">Activate BlockSafe</button>
+  </section>
+
+  <!-- ACTIVATION FEATURES SECTION (Hidden by Default) -->
+  <!-- <section id="activateFeatures">
+    <div class="feature-bar">🤖 Phishing Check</div>
+    <div class="feature-bar">⚠️ Wallet Risk</div>
+    <div class="feature-bar">🔍 Txn Simulation</div>
+  </section> -->
+
+  <section id="activateFeatures">
+
+    <div class="feature-bar" id="phisingCheck">
+      <span class="feature-icon">🤖</span>
+      <span class="feature-text">PHISHING CHECK</span>
+      <span class="feature-status">ACTIVE</span>
+    </div>
+
+    <div class="feature-bar" id="contractRisk">
+      <span class="feature-icon">⚠️</span>
+      <span class="feature-text">CONTRACT RISK</span>
+      <span class="feature-status">SCANNING</span>
+    </div>
+
+    <!-- Clickable TXN SIMULATION bar -->
+    <div class="feature-bar" id="txnSimulator">
+      <span class="feature-icon">🔍</span>
+      <span class="feature-text">TXN SIMULATION</span>
+      <span class="feature-status">READY</span>
+    </div>
+
+
+  </section>
+
+  <script>
+    document.getElementById("txnSimulator").addEventListener("click", function () {
+      // Redirect to your Robotic UI page
+      window.location.href = "robotic_ui.html"; // change to the correct filename or path
+    });
+    document.getElementById("contractRisk").addEventListener("click", function () {
+
+      window.location.href("contractScanner.html");
+
+    });
+  </script>
+
+  <!-- CARDS SECTION (3 BLOCKS) -->
+  <section class="cards" id="cards">
+    <!-- Card 1: Our Motto -->
+    <div class="card reveal">
+      <h3>🔐 Our Motto</h3>
+      <p>
+        Empowering Web3 explorers with real-time, iron-clad defense.<br>
+        BlockSafe scans before you sign, warns before you connect.<br>
+        No blind approvals. No silent scams.<br>
+        Navigate the blockchain fearlessly.<br>
+        Block by block. Scam by scam.
+      </p>
+    </div>
+    <!-- Card 2: Why We Built This -->
+    <div class="card reveal">
+      <h3>📢 Why We Built This</h3>
+      <p>
+        Every day, countless Web3 users lose funds to malicious dApps and fake websites.<br>
+        Transparency in blockchain is powerful—but also risky.<br>
+        Users need instant risk insight, not guesswork.<br>
+        BlockSafe delivers that clarity.<br>
+        A secure Web3 future begins with informed clicks.
+      </p>
+    </div>
+    <!-- Card 3: Online Scam Reality -->
+    <div class="card reveal">
+      <h3>🤖 Online Scam Reality</h3>
+      <div class="robot-emoji">🤖</div>
+      <p>
+        Web3 is the wild frontier—hackers use phishing, fake popups, and malicious links to exploit users.<br>
+        BlockSafe identifies hidden threats in real time.<br>
+        This bot is enhancing itself to warn you of scams!
+      </p>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS SECTION -->
+  <section class="testimonials reveal" id="testimonials">
+    <h2 class="bounce-in">What Our Users Say</h2>
+    <div class="testimonial-item">
+      "BlockSafe transformed my online experience—no more scams, only secure transactions!"
+    </div>
+    <div class="testimonial-item">
+      "The interface is out of this world; it feels futuristic and invincible."
+    </div>
+    <div class="testimonial-item">
+      "I trust BlockSafe with all my crypto transactions. It's a game-changer!"
+    </div>
+  </section>
+
+  <!-- FEATURES SECTION -->
+  <section class="features reveal" id="features">
+    <div class="parallax-bg"></div>
+    <div class="feature trigger-spin">
+      <h3>Real-Time Monitoring</h3>
+      <p>Experience non-stop surveillance with our state-of-the-art blockchain scanners that operate 24/7.</p>
+    </div>
+    <div class="feature trigger-pulse">
+      <h3>Intelligent Alerts</h3>
+      <p>Instant notifications and risk insights delivered straight to your device.</p>
+    </div>
+    <div class="feature trigger-bounce">
+      <h3>Decentralized Security</h3>
+      <p>Leverage the power of distributed networks to ensure your transactions are shielded from threats.</p>
+    </div>
+    <div class="feature trigger-flitter">
+      <h3>Future-Proof Technology</h3>
+      <p>Our platform is built to evolve—integrating cutting-edge AI and machine learning for continuous improvement.
+      </p>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer id="footer">
+    <p>&copy; 2025 BlockSafe. All Rights Reserved.</p>
+    <div class="scroll-indicator"></div>
+  </footer>
+
+  <script>
+    // ROBOTIC LINE EFFECTS
+    const roboticLinesContainer = document.getElementById('roboticLines');
+    const lineCount = 15;
+
+    // Create horizontal scanning lines
+    for (let i = 0; i < lineCount; i++) {
+      const line = document.createElement('div');
+      line.className = 'scan-line';
+      line.style.top = `${Math.random() * 100}%`;
+      line.style.animationDelay = `${Math.random() * 4}s`;
+      line.style.animationDuration = `${3 + Math.random() * 3}s`;
+      roboticLinesContainer.appendChild(line);
+    }
+
+    // Create robotic grid lines
+    for (let i = 0; i < 10; i++) {
+      // Horizontal lines
+      const hLine = document.createElement('div');
+      hLine.className = 'robotic-line horizontal';
+      hLine.style.top = `${(i + 1) * 10}%`;
+      hLine.style.animation = `moveHorizontal ${8 + Math.random() * 8}s linear infinite`;
+      hLine.style.animationDelay = `${Math.random() * 5}s`;
+      roboticLinesContainer.appendChild(hLine);
+
+      // Vertical lines
+      const vLine = document.createElement('div');
+      vLine.className = 'robotic-line vertical';
+      vLine.style.left = `${(i + 1) * 10}%`;
+      vLine.style.animation = `moveVertical ${10 + Math.random() * 10}s linear infinite`;
+      vLine.style.animationDelay = `${Math.random() * 5}s`;
+      roboticLinesContainer.appendChild(vLine);
+    }
+
+    // Diagonal lines
+    for (let i = 0; i < 5; i++) {
+      const dLine = document.createElement('div');
+      dLine.className = 'robotic-line diagonal';
+      dLine.style.top = `${Math.random() * 100}%`;
+      dLine.style.left = `${Math.random() * 100}%`;
+      dLine.style.animation = `moveDiagonal ${12 + Math.random() * 8}s linear infinite`;
+      dLine.style.animationDelay = `${Math.random() * 5}s`;
+      roboticLinesContainer.appendChild(dLine);
+    }
+
+    // RIPPLE EFFECT ON BUTTON CLICK
+    document.getElementById('activateBtn').addEventListener('click', function (e) {
+      const btn = e.currentTarget;
+      const ripple = document.createElement('span');
+      ripple.className = 'ripple';
+      const rect = btn.getBoundingClientRect();
+      ripple.style.left = `${e.clientX - rect.left}px`;
+      ripple.style.top = `${e.clientY - rect.top}px`;
+      btn.appendChild(ripple);
+      setTimeout(() => { ripple.remove(); }, 800);
+
+      // Reveal the hidden activate features section with fade-in effect
+      const featuresSection = document.getElementById('activateFeatures');
+      featuresSection.style.display = 'block';
+      featuresSection.classList.add('fade-in');
+    });
+
+    // SCROLL REVEAL EFFECT
+    function revealOnScroll() {
+      const reveals = document.querySelectorAll('.reveal');
+      for (let i = 0; i < reveals.length; i++) {
+        const windowHeight = window.innerHeight;
+        const elementTop = reveals[i].getBoundingClientRect().top;
+        const revealPoint = 150;
+        if (elementTop < windowHeight - revealPoint) {
+          reveals[i].classList.add('active');
+        } else {
+          reveals[i].classList.remove('active');
+        }
+      }
+    }
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll();
+
+    // PARALLAX EFFECT FOR FEATURES SECTION
+    window.addEventListener('scroll', function () {
+      const parallax = document.querySelector('.parallax-bg');
+      let offset = window.pageYOffset;
+      parallax.style.transform = 'translateY(' + offset * 0.4 + 'px)';
+    });
+
+    // NAVIGATION ACTIVE LINK TOGGLE
+    const navLinks = document.querySelectorAll('nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', function () {
+        navLinks.forEach(l => l.classList.remove('active'));
+        this.classList.add('active');
+      });
+    });
+
+    // EXTRA GLOW TO LOGO ON SCROLL
+    window.addEventListener('scroll', function () {
+      const logo = document.querySelector('.logo');
+      if (window.scrollY > 200) {
+        logo.classList.add('extra-glow');
+      } else {
+        logo.classList.remove('extra-glow');
+      }
+    });
+  </script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const txnSimElement = Array.from(document.querySelectorAll('.feature-bar')).find(el =>
+        el.querySelector('.feature-text')?.textContent.trim() === "TXN SIMULATION" &&
+        el.querySelector('.feature-status')?.textContent.trim() === "READY"
+      );
+
+      if (txnSimElement) {
+        txnSimElement.style.cursor = "pointer";
+        txnSimElement.addEventListener("click", () => {
+          window.location.href = "http://127.0.0.1:5501/Blocksafe/transaction.html";
+        });
+      }
+    });
+    document.addEventListener("DOMContentLoaded", function () {
+      const contractRiskElement = Array.from(document.querySelectorAll('.feature-bar')).find(el =>
+    el.querySelector('.feature-text')?.textContent.trim() === "CONTRACT RISK" &&
+    el.querySelector('.feature-status')?.textContent.trim() === "SCANNING"
+  );
+
+  if (contractRiskElement) {
+    contractRiskElement.style.cursor = "pointer";
+    contractRiskElement.addEventListener("click", () => {
+      window.location.href = "http://127.0.0.1:5501/Blocksafe/contractScanner.html";
+    });
+  }
+    });
+
+    document.addEventListener("DOMContentLoaded", function () {
+      const contractRiskElement = Array.from(document.querySelectorAll('.feature-bar')).find(el =>
+    el.querySelector('.feature-text')?.textContent.trim() === "PHISHING CHECK" &&
+    el.querySelector('.feature-status')?.textContent.trim() === "ACTIVE"
+  );
+
+  if (contractRiskElement) {
+    contractRiskElement.style.cursor = "pointer";
+    contractRiskElement.addEventListener("click", () => {
+      window.location.href = "http://127.0.0.1:5501/websafe/wallet.html";
+    });
+  }
+    });
+  </script>
+
+</body>
+
+</html>

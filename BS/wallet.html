@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BlockSafe Phishing Detector</title>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background-color: #0f0f0f;
+      color: #00ffe0;
+      font-family: 'Share Tech Mono', monospace;
+      overflow: hidden;
+      margin: 0;
+      padding: 20px;
+      position: relative;
+    }
+
+    h2, p {
+      text-shadow: 0 0 5px #00ffe0, 0 0 10px #00ffe0;
+    }
+
+    .result {
+      border: 2px solid #00ffe0;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+      background: rgba(0, 0, 0, 0.6);
+      box-shadow: 0 0 15px rgba(0, 255, 224, 0.3);
+    }
+
+    .primary-button, .danger-button {
+      background: transparent;
+      color: #00ffe0;
+      border: 2px solid #00ffe0;
+      padding: 10px 15px;
+      font-size: 14px;
+      margin: 5px;
+      cursor: pointer;
+      transition: 0.3s;
+      text-transform: uppercase;
+    }
+
+    .primary-button:hover, .danger-button:hover {
+      background: #00ffe0;
+      color: #000;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .glitch {
+      position: relative;
+      color: #00ffe0;
+      font-weight: bold;
+      animation: glitch 1s infinite;
+    }
+
+    @keyframes glitch {
+      0% { text-shadow: 2px 2px #ff00c8, -2px -2px #00ffe0; }
+      20% { text-shadow: -2px 0 #ff00c8, 2px 2px #00ffe0; }
+      40% { text-shadow: 2px -2px #ff00c8, -2px 2px #00ffe0; }
+      60% { text-shadow: -2px -2px #ff00c8, 2px 0 #00ffe0; }
+      80% { text-shadow: 0 2px #ff00c8, 0 -2px #00ffe0; }
+      100% { text-shadow: 2px 2px #ff00c8, -2px -2px #00ffe0; }
+    }
+
+    #background-lines {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .line {
+      position: absolute;
+      width: 2px;
+      background: #00ffe0;
+      opacity: 0.1;
+      animation: floatDown linear infinite;
+    }
+
+    @keyframes floatDown {
+      0% { transform: translateY(-150%); }
+      100% { transform: translateY(150%); }
+    }
+
+    input, button {
+      font-family: inherit;
+    }
+
+    input {
+      padding: 10px;
+      background: transparent;
+      border: 2px solid #00ffe0;
+      color: #00ffe0;
+      width: 100%;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+  <div id="background-lines"></div>
+  <h2 class="glitch">BlockSafe Phishing Detector</h2>
+  <input type="text" id="domainInput" placeholder="Enter domain or URL" />
+  <button id="scanDomainBtn" class="primary-button">Scan Domain</button>
+  <div id="loading" class="hidden">🔍 Scanning...</div>
+  <div id="domainResult"></div>
+
+  <script>
+    const popularDomains = [
+      { name: "metamask.io", keywords: ["metamask"] },
+      { name: "uniswap.org", keywords: ["uniswap"] },
+      { name: "opensea.io", keywords: ["opensea"] },
+      { name: "phantom.app", keywords: ["phantom"] },
+      { name: "walletconnect.com", keywords: ["wallet", "connect"] },
+      { name: "trustwallet.com", keywords: ["trust", "wallet"] }
+    ];
+
+    const localPhishingDomains = [
+      "metamask1.io",
+      "metamask-io.com",
+      "phantom-app.net",
+      "unlswap.org",
+      "uniswap-exchange.org",
+      "opensea-io.com",
+      "pancakeswapp.finance",
+      "wallletconnect.com",
+      "trustwallet-app.com",
+      "binance-us.net",
+      "coinbase-wallet.io"
+    ];
+
+    const suspiciousPatterns = [
+      "meta-mask",
+      "wallet-connect",
+      "phantom-wallet",
+      "trust-wallet"
+    ];
+
+    let domainInput, scanDomainBtn, domainResult, loadingElement, currentUrl = '';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      domainInput = document.getElementById('domainInput');
+      scanDomainBtn = document.getElementById('scanDomainBtn');
+      domainResult = document.getElementById('domainResult');
+      loadingElement = document.getElementById('loading');
+
+      scanDomainBtn.addEventListener('click', handleScanButtonClick);
+
+      // Background animation
+      const bg = document.getElementById('background-lines');
+      for (let i = 0; i < 50; i++) {
+        const line = document.createElement('div');
+        line.classList.add('line');
+        line.style.left = `${Math.random() * 100}%`;
+        line.style.animationDuration = `${5 + Math.random() * 5}s`;
+        line.style.height = `${50 + Math.random() * 100}px`;
+        bg.appendChild(line);
+      }
+    });
+
+    async function handleScanButtonClick() {
+      const input = domainInput.value.trim();
+      if (!input) {
+        alert('Please enter a domain or URL');
+        return;
+      }
+
+      currentUrl = normalizeUrl(input);
+      showLoading();
+
+      try {
+        const result = await checkDomainRisk(input);
+        showResult(result);
+      } catch (err) {
+        console.error(err);
+        domainResult.innerHTML = '<div class="error">❌ Scan failed. Check console</div>';
+        hideLoading();
+      }
+    }
+
+    function normalizeUrl(url) {
+      if (!url.startsWith('http://') && !url.startsWith('https://')) {
+        return 'https://' + url;
+      }
+      return url;
+    }
+
+    function showLoading() {
+      if (loadingElement) loadingElement.classList.remove('hidden');
+      domainResult.innerHTML = '';
+    }
+
+    function hideLoading() {
+      if (loadingElement) loadingElement.classList.add('hidden');
+    }
+
+    function extractDomain(input) {
+      return input.toLowerCase()
+        .replace(/^https?:\/\/(www\.)?/, '')
+        .split(/[/?#:]/)[0]
+        .trim();
+    }
+
+    function checkWithLocalMethods(hostname) {
+      const normalized = hostname.replace(/^www\./, '').toLowerCase();
+
+      if (localPhishingDomains.includes(normalized)) {
+        return {
+          isPhishing: true,
+          reason: 'known_phishing',
+          details: 'This domain is in our database of known phishing sites.'
+        };
+      }
+
+      for (const pattern of suspiciousPatterns) {
+        if (normalized.includes(pattern)) {
+          return {
+            isPhishing: true,
+            reason: 'suspicious_pattern',
+            details: `Suspicious pattern detected: "${pattern}"`
+          };
+        }
+      }
+
+      for (const domain of popularDomains) {
+        if (normalized === domain.name) continue;
+
+        for (const keyword of domain.keywords) {
+          if (normalized.includes(keyword) && normalized !== domain.name) {
+            return {
+              isPhishing: true,
+              reason: 'typosquatting',
+              details: `This domain appears to mimic ${domain.name}`,
+              legitimateDomain: domain.name
+            };
+          }
+        }
+      }
+
+      return { isPhishing: false, reason: null, details: null };
+    }
+
+    async function fetchPhishingDomains() {
+      const proxyUrl = "https://api.allorigins.win/raw?url=";
+      const targetUrl = "https://raw.githubusercontent.com/scamsniffer/blocklist/main/domains/blacklist.json";
+
+      try {
+        const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+        const domains = await response.json();
+        return domains.map(d => d.toLowerCase().trim());
+      } catch (err) {
+        console.error('Blocklist fetch failed:', err);
+        return localPhishingDomains;
+      }
+    }
+
+    async function checkDomainRisk(domainInput) {
+      const formatted = extractDomain(domainInput);
+      const localResult = checkWithLocalMethods(formatted);
+      if (localResult.isPhishing) {
+        return {
+          ...localResult,
+          source: 'local_database',
+          legitimateDomain: localResult.legitimateDomain || null
+        };
+      }
+
+      try {
+        const domainList = await fetchPhishingDomains();
+        const isMalicious = domainList.some(domain =>
+          formatted === domain || formatted.endsWith(`.${domain}`)
+        );
+
+        if (isMalicious) {
+          return {
+            isPhishing: true,
+            reason: 'external_blocklist',
+            details: 'This domain is on an external phishing blocklist.',
+            source: 'external_blocklist'
+          };
+        }
+      } catch {}
+
+      return {
+        isPhishing: false,
+        details: 'This website appears to be safe based on our checks',
+        source: 'all_checks'
+      };
+    }
+
+    function showResult(data) {
+      hideLoading();
+
+      if (data.error) {
+        domainResult.innerHTML = `<div class="result warning"><h2>Error</h2><p>${data.error}</p></div>`;
+        return;
+      }
+
+      if (data.isPhishing) {
+        domainResult.innerHTML = `
+          <div class="result danger">
+            <h2 class="glitch">⚠️ Warning: Dangerous Website</h2>
+            <p>This site might be trying to steal your crypto.</p>
+            <p><strong>URL:</strong> ${currentUrl}</p>
+            <p><strong>Reason:</strong> ${data.details}</p>
+            ${data.legitimateDomain ? `<p><strong>Did you mean:</strong> <a href="https://${data.legitimateDomain}" target="_blank">${data.legitimateDomain}</a>?</p>` : ''}
+            <div class="result-actions">
+              <button id="proceedButton" class="danger-button">Proceed Anyway</button>
+              <button id="blockButton" class="primary-button">Block Site</button>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('proceedButton').onclick = () => {
+          if (confirm("This site may be unsafe. Continue?")) {
+            window.open(currentUrl, '_blank');
+          }
+        };
+
+        document.getElementById('blockButton').onclick = () => {
+          alert("Site blocked. You’ll be protected from it.");
+        };
+        return;
+      }
+
+      domainResult.innerHTML = `
+        <div class="result safe">
+          <h2 class="glitch">✅ Safe Website</h2>
+          <p>${data.details}</p>
+          <p><strong>URL:</strong> ${currentUrl}</p>
+          <p><strong>Source:</strong> ${data.source}</p>
+          <a href="${currentUrl}" target="_blank" class="primary-button">Visit Website</a>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>

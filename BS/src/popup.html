@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockSafe</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            width: 320px;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        .container {
+            padding: 16px;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 16px;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 12px;
+        }
+        .logo {
+            font-size: 24px;
+            margin-right: 8px;
+        }
+        .title {
+            font-size: 18px;
+            font-weight: bold;
+            flex-grow: 1;
+        }
+        .status-container {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+        .status-icon {
+            font-size: 48px;
+            margin-bottom: 8px;
+        }
+        .status-text {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .status-description {
+            font-size: 14px;
+            color: #666;
+        }
+        .domain-info {
+            background-color: #f9f9f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .domain-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+        .domain-value {
+            font-size: 16px;
+            word-break: break-all;
+        }
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .feature-item {
+            display: flex;
+            align-items: center;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 12px;
+        }
+        .feature-icon {
+            font-size: 20px;
+            margin-right: 12px;
+            color: #0066cc;
+        }
+        .feature-text {
+            font-size: 14px;
+        }
+        .footer {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+        /* Status-specific styles */
+        .status-safe {
+            background-color: #e6f7ed;
+        }
+        .status-safe .status-icon,
+        .status-safe .status-text {
+            color: #00a651;
+        }
+        .status-warning {
+            background-color: #fff8e6;
+        }
+        .status-warning .status-icon,
+        .status-warning .status-text {
+            color: #ffa500;
+        }
+        .status-danger {
+            background-color: #ffebee;
+        }
+        .status-danger .status-icon,
+        .status-danger .status-text {
+            color: #ff3b30;
+        }
+        .status-unknown {
+            background-color: #f5f5f5;
+        }
+        .status-unknown .status-icon,
+        .status-unknown .status-text {
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🛡️</div>
+            <div class="title">BlockSafe</div>
+        </div>
+        
+        <div id="status-container" class="status-container status-unknown">
+            <div id="status-icon" class="status-icon">⏳</div>
+            <div id="status-text" class="status-text">Checking...</div>
+            <div id="status-description" class="status-description">Analyzing this website for security threats...</div>
+        </div>
+        
+        <div class="domain-info">
+            <div class="domain-label">Current Website:</div>
+            <div id="current-domain" class="domain-value">Loading...</div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-item">
+                <div class="feature-icon">🔍</div>
+                <div class="feature-text">BlockSafe is actively monitoring for phishing websites and scams</div>
+            </div>
+            <div class="feature-item">
+                <div class="feature-icon">🔄</div>
+                <div class="feature-text">Real-time protection against malicious Web3 sites</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            BlockSafe v1.0.0 - Web3 Security Extension
+        </div>
+    </div>
+    
+    <script src="popup.js"></script>
+</body>
+</html>

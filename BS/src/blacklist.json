@@ -1,0 +1,21 @@
+{
+  "phishingDomains": [
+    "metamask1.io",
+    "metamask-io.com",
+    "phantom-app.net",
+    "unlswap.org",
+    "uniswap-exchange.org",
+    "opensea-io.com",
+    "pancakeswapp.finance",
+    "wallletconnect.com",
+    "trustwallet-app.com",
+    "binance-us.net",
+    "coinbase-wallet.io"
+  ],
+  "suspiciousPatterns": [
+    "meta-mask",
+    "wallet-connect",
+    "phantom-wallet",
+    "trust-wallet"
+  ]
+}

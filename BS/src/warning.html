@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockSafe Security Warning</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #ff3b30;
+            color: white;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+        }
+        .warning-container {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        .warning-icon {
+            font-size: 72px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 32px;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        .details {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        button {
+            background-color: white;
+            color: #ff3b30;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button.secondary {
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .legitimate-link {
+            margin-top: 15px;
+            font-size: 16px;
+        }
+        .legitimate-link a {
+            color: white;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="warning-container">
+        <div class="warning-icon">⚠️</div>
+        <h1>BlockSafe Security Alert</h1>
+        <p id="warning-message">This website has been flagged as potentially dangerous and may be attempting to steal your cryptocurrency or wallet information.</p>
+        
+        <div class="details">
+            <p><strong>Blocked URL:</strong> <span id="blocked-url">Loading...</span></p>
+            <p><strong>Reason:</strong> <span id="block-reason">Loading...</span></p>
+        </div>
+        
+        <div id="legitimate-suggestion" class="legitimate-link" style="display: none;">
+            <p>Did you mean to visit: <a id="legitimate-link" href="#" target="_blank">legitimate-site.com</a>?</p>
+        </div>
+        
+        <div class="buttons">
+            <button id="back-button">Go Back to Safety</button>
+            <button id="proceed-button" class="secondary">Proceed Anyway (Unsafe)</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get information about the blocked site
+            chrome.runtime.sendMessage({action: 'getLastBlocked'}, function(response) {
+                if (response && response.data) {
+                    const blockedData = response.data;
+                    
+                    // Update the UI with details
+                    document.getElementById('blocked-url').textContent = blockedData.url;
+                    
+                    // Set the reason text based on the block reason
+                    let reasonText = 'Unknown security risk';
+                    switch(blockedData.reason) {
+                        case 'known_phishing':
+                            reasonText = 'Known phishing website that may steal your crypto assets';
+                            break;
+                        case 'suspicious_pattern':
+                            reasonText = 'Suspicious domain pattern detected';
+                            break;
+                        case 'typosquatting':
+                            reasonText = 'This appears to be a fake website mimicking a legitimate service';
+                            
+                            // Show the legitimate domain suggestion
+                            if (blockedData.legitimateDomain) {
+                                document.getElementById('legitimate-suggestion').style.display = 'block';
+                                const legitimateLink = document.getElementById('legitimate-link');
+                                legitimateLink.textContent = blockedData.legitimateDomain;
+                                legitimateLink.href = 'https://' + blockedData.legitimateDomain;
+                            }
+                            break;
+                    }
+                    document.getElementById('block-reason').textContent = reasonText;
+                }
+            });
+            
+            // Set up button actions
+            document.getElementById('back-button').addEventListener('click', function() {
+                window.history.back();
+            });
+            
+            document.getElementById('proceed-button').addEventListener('click', function() {
+                const confirmProceed = confirm('WARNING: Proceeding to this site may put your crypto assets at risk. Are you absolutely sure you want to continue?');
+                if (confirmProceed) {
+                    chrome.runtime.sendMessage({action: 'getLastBlocked'}, function(response) {
+                        if (response && response.data) {
+                            window.location.href = response.data.url;
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

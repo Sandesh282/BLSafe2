@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transaction Simulator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: 'Orbitron', sans-serif;
+      color: #00ffff;
+      background-color: #01070f;
+    }
+
+    .lines-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .line, .data-stream {
+      position: absolute;
+      width: 2px;
+      height: 100vh;
+      background-color: rgba(0, 255, 255, 0.07);
+      animation: moveLine 10s linear infinite;
+    }
+
+    .line.horizontal {
+      width: 100vw;
+      height: 2px;
+      animation: moveLineHorizontal 10s linear infinite;
+    }
+
+    .data-stream {
+      background-color: rgba(0, 255, 255, 0.4);
+      width: auto;
+      height: auto;
+      color: #0ff;
+      font-size: 12px;
+      white-space: nowrap;
+      animation: scrollData 6s linear infinite;
+    }
+
+    @keyframes moveLine {
+      0% { transform: translateY(-100%); }
+      100% { transform: translateY(100%); }
+    }
+
+    @keyframes moveLineHorizontal {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(100%); }
+    }
+
+    @keyframes scrollData {
+      0% { transform: translateY(-100%); opacity: 1; }
+      100% { transform: translateY(100%); opacity: 0; }
+    }
+
+    .scanlines {
+      position: fixed;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        to bottom,
+        rgba(0, 255, 255, 0.03),
+        rgba(0, 255, 255, 0.03) 2px,
+        transparent 2px,
+        transparent 4px
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .glitch-border {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+
+    .glitch-border::before,
+    .glitch-border::after {
+      content: "";
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px solid #00ffff55;
+      animation: glitch 0.8s infinite;
+    }
+
+    .glitch-border::after {
+      border-color: #0fffc177;
+      animation-delay: 0.2s;
+    }
+
+    @keyframes glitch {
+      0% { transform: translate(0, 0); }
+      25% { transform: translate(1px, -1px); }
+      50% { transform: translate(-1px, 1px); }
+      75% { transform: translate(1px, 1px); }
+      100% { transform: translate(0, 0); }
+    }
+
+    .holo-ring {
+      position: absolute;
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 2px solid rgba(0, 255, 255, 0.2);
+      animation: rotateRing 10s linear infinite;
+      top: -100px;
+      left: -100px;
+      z-index: 1;
+    }
+
+    @keyframes rotateRing {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .simulator {
+  position: relative;
+  z-index: 2;
+  background-color: #0b111a;
+  border-radius: 16px;
+  padding: 52px 39px; /* increased padding by 30% */
+  width: 520px;        /* 400px → 400 + 30% = 520px */
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.4);
+  border: 2px solid #00ffff;
+  backdrop-filter: blur(6px);
+  margin: 70px auto;   /* pulled up a bit so it’s still centered */
+}
+
+
+    .simulator::before {
+      content: "";
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 20px;
+      background: linear-gradient(135deg, rgba(0,255,255,0.3), transparent);
+      z-index: -1;
+    }
+
+    .simulator h2 {
+      text-align: center;
+      font-size: 22px;
+      margin-bottom: 30px;
+      color: #00ffff;
+      text-shadow: 0 0 10px #00ffff;
+      animation: flicker 1.5s infinite;
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+      80% { opacity: 0.4; }
+    }
+
+    .simulator label {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 14px;
+    }
+
+    .simulator input {
+      width: 100%;
+      padding: 12px;
+      margin-bottom: 20px;
+      background-color: #08121a;
+      border: 1px solid #00c6ff;
+      border-radius: 6px;
+      color: #00ffff;
+      font-size: 14px;
+      outline: none;
+      transition: 0.3s ease;
+    }
+
+    .simulator input::placeholder {
+      color: #66e0ff88;
+    }
+
+    .simulator input:focus {
+      box-shadow: 0 0 8px #00ffffaa;
+      border-color: #00ffff;
+    }
+
+    .simulate-btn {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(90deg, #00ffff, #0fffc1);
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(0, 255, 255, 0.6);
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .simulate-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 25px rgba(0, 255, 255, 0.9);
+    }
+  </style>
+</head>
+<body>
+  <div class="lines-background"></div>
+  <div class="scanlines"></div>
+  <div class="holo-ring"></div>
+  <div class="simulator">
+    <div class="glitch-border"></div>
+    <h2>TRANSACTION SIMULATOR</h2>
+
+    <label for="from">FROM:</label>
+    <input type="text" id="from" placeholder="0x...">
+
+    <label for="to">TO:</label>
+    <input type="text" id="to" placeholder="0x... or domain">
+
+    <label for="value">VALUE (ETH):</label>
+    <input type="text" id="value" placeholder="0.0">
+
+    <label for="data">DATA (HEX):</label>
+    <input type="text" id="data" placeholder="0x...">
+
+    <button class="simulate-btn">🔍 SIMULATE TXN</button>
+  </div>
+
+  <script>
+    const background = document.querySelector('.lines-background');
+    const floatTexts = ["blocksafe", "IIIT Lucknow", "Hackofiesta 6.1"];
+  
+    for (let i = 0; i < 150; i++) {
+      const line = document.createElement('div');
+      line.classList.add('line');
+      line.style.left = `${Math.random() * 100}vw`;
+      line.style.animationDuration = `${5 + Math.random() * 10}s`;
+      background.appendChild(line);
+    }
+  
+    for (let i = 0; i < 100; i++) {
+      const hline = document.createElement('div');
+      hline.classList.add('line', 'horizontal');
+      hline.style.top = `${Math.random() * 100}vh`;
+      hline.style.animationDuration = `${5 + Math.random() * 10}s`;
+      background.appendChild(hline);
+    }
+  
+    for (let i = 0; i < 40; i++) {
+      const stream = document.createElement('div');
+      stream.classList.add('data-stream');
+      stream.innerText = floatTexts[i % floatTexts.length]; // alternate between the 3 texts
+      stream.style.left = `${Math.random() * 100}vw`;
+      stream.style.top = `${Math.random() * 100}vh`;
+      stream.style.animationDuration = `${3 + Math.random() * 6}s`;
+      background.appendChild(stream);
+    }
+  </script>
+  
+  
+  
+</body>
+</html>

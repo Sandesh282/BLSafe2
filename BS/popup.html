@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>BlockSafe</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 1rem;
+      width: 320px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 1.5rem;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 1.75rem;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 0.2rem;
+    }
+
+    .subtitle {
+      font-size: 0.95rem;
+      color: #6b7280;
+      margin-bottom: 1.2rem;
+    }
+
+    .status {
+      background-color: #d1fae5;
+      color: #065f46;
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      display: inline-block;
+      margin-bottom: 1.25rem;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+
+    .checkbox {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .btn-group {
+      display: flex;
+      justify-content: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    button {
+      background-color: #2563eb;
+      color: white;
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #1d4ed8;
+    }
+
+    .risk {
+      font-weight: 600;
+      color: #111827;
+      font-size: 0.95rem;
+    }
+
+    .disabled {
+      background-color: #e5e7eb !important;
+      color: #9ca3af !important;
+      cursor: not-allowed !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">🔒 BlockSafe</div>
+    <div class="subtitle">Your transaction shield</div>
+    <div id="status" class="status">✅ Safe</div>
+
+    <div class="checkbox">
+      <input type="checkbox" id="enable-scan" checked />
+      <label for="enable-scan">Enable Transaction Scan</label>
+    </div>
+
+    <div class="btn-group">
+      <button id="scan-contract">Scan Contract</button>
+      <button id="scan-transaction">Scan Transaction</button>
+    </div>
+
+    <div class="risk">Risk Score: <span id="risk">0%</span></div>
+  </div>
+
+  <script>
+    const enableScan = document.getElementById("enable-scan");
+    const scanContractBtn = document.getElementById("scan-contract");
+    const scanTransactionBtn = document.getElementById("scan-transaction");
+    const riskSpan = document.getElementById("risk");
+    const status = document.getElementById("status");
+
+    function simulateScan(type) {
+      if (!enableScan.checked) {
+        alert("Transaction scanning is disabled!");
+        return;
+      }
+
+      // Fake risk score between 0 and 100
+      const riskScore = Math.floor(Math.random() * 100);
+      riskSpan.textContent = `${riskScore}%`;
+
+      if (riskScore > 70) {
+        status.textContent = "🚨 Risky";
+        status.style.backgroundColor = "#fee2e2";
+        status.style.color = "#991b1b";
+      } else if (riskScore > 30) {
+        status.textContent = "⚠️ Moderate";
+        status.style.backgroundColor = "#fef9c3";
+        status.style.color = "#92400e";
+      } else {
+        status.textContent = "✅ Safe";
+        status.style.backgroundColor = "#d1fae5";
+        status.style.color = "#065f46";
+      }
+    }
+
+    scanContractBtn.addEventListener("click", () => simulateScan("contract"));
+    scanTransactionBtn.addEventListener("click", () => simulateScan("transaction"));
+
+    enableScan.addEventListener("change", () => {
+      const isChecked = enableScan.checked;
+      [scanContractBtn, scanTransactionBtn].forEach(btn => {
+        btn.disabled = !isChecked;
+        btn.classList.toggle("disabled", !isChecked);
+      });
+    });
+  </script>
+</body>
+</html>
